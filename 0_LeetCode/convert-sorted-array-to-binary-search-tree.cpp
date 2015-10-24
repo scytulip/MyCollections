@@ -33,3 +33,34 @@ public:
         return(createTree(num,0,num.size()-1));
     }
 };
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+private:
+    vector<int> *num;
+    TreeNode* buildTree(int a, int b)
+    {
+        if (a>b) return NULL;
+        if (a==b) return (new TreeNode((*num)[a]));
+        
+        int idx = (a+b)/2;
+        TreeNode* root = new TreeNode((*num)[idx]);
+        root->left = buildTree(a,idx-1);
+        root->right = buildTree(idx+1,b);
+        
+        return root;
+    }
+public:
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        num = &nums;
+        return buildTree(0, nums.size()-1);
+    }
+};
