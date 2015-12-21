@@ -1,0 +1,46 @@
+// VerilogA for V_to_CtrlBits, veriloga
+// Convert input voltage to binary bits.
+//
+// ex.
+// 1V -> 00001, 2V -> 00010, 16V -> 10000
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define MAX_BIT 4
+
+module V_to_CtrlBits(B, VDD, VSS, VSCAN);
+
+    output [0:`MAX_BIT] B;
+    electrical [0:`MAX_BIT] B;
+
+    inout VDD;electrical VDD; // Supply voltage between VDD & VSS
+    inout VSS;electrical VSS;
+
+    input VSCAN;electrical VSCAN; // VSCAN is referred to gnd!
+
+    integer i,j;
+    integer val[0:`MAX_BIT];
+
+    analog begin
+
+	j = 2;
+
+	for (i=0; i<=`MAX_BIT; i=i+1)
+	begin
+		if (V(VSCAN,VSS)%j>=(j/2)) //Convert to binary
+			val[i] = V(VDD,VSS);
+		else
+			val[i] = V(VSS);
+		j = j*2;
+	end
+
+	generate i (0,`MAX_BIT)
+	begin
+		V(B[i],VSS) <+ val[i]; //Output voltage value, referred to VSS
+	end
+
+    end
+
+endmodule
+
