@@ -181,3 +181,41 @@ Order by grade, name;
 
 /* Q7  (1 point possible)
 For each student A who likes a student B where the two are not friends, find if they have a friend C in common (who can introduce them!). For all such trios, return the name and grade of A, B, and C. */
+
+Select T5.n1, T5.gr1, T5.n2, T5.gr2, name as n3, grade as gr3 From
+(Select T4.ID1, T4.n1, T4.gr1, T4.ID2, name as n2, grade as gr2, T4.fID1 From
+(Select T3.ID1, name as n1, grade as gr1, T3.ID2, T3.fID1 From
+	(Select T2.ID1, T2.ID2, fID1
+	From
+		(Select T1.ID1, Friend.ID2 as fID1, T1.ID2
+		From
+			(Select *
+			From Likes
+			Where Likes.ID2 not in 
+				(Select Friend.ID2 From Friend Where Friend.ID1 = Likes.ID1)) as T1
+		Inner Join Friend On Friend.ID1 = T1.ID1) as T2
+	Inner Join Friend On Friend.ID1 = T2.ID2
+	Where fID1 = Friend.ID2) as T3
+Inner Join Highschooler On Highschooler.ID = T3.ID1) as T4
+Inner Join Highschooler On Highschooler.ID = T4.ID2) as T5
+Inner Join Highschooler On Highschooler.ID = T5.fID1
+
+/* Q8  (1 point possible)
+Find the difference between the number of students in the school and the number of different first names. */
+
+Select cp-cn
+From
+	(Select count(*) as cp From Highschooler) as T0,
+	(Select count(*) as cn
+	From (Select count(*) From Highschooler Group by name) as T1) as T2
+	
+/* Q9  (1 point possible)
+Find the name and grade of all students who are liked by more than one other student. */
+
+Select name, grade
+From
+	(Select T1.ID2 From
+		(Select Likes.ID2, count(*) as ln From Likes Group by ID2) as T1
+	Where ln >= 2) as T2
+Inner Join Highschooler On Highschooler.ID = T2.ID2
+
