@@ -18,3 +18,14 @@ cc_binary(
 	"-Ithird_party/usr/include/x86_64-linux-gnu/c++/4.8",
     ],
 )
+
+cc_binary(
+    name = "gflags_test",
+    srcs = ["gflags_test.cpp"],
+    deps = [
+        "//third_party:gflags",
+    ],
+    copts = [
+        "-Ithird_party/gflags_hdr",
+    ],
+)
