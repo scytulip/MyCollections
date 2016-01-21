@@ -29,9 +29,13 @@
  * Message Types
  */
 enum MsgTypes{
-    JOINREQ,
-    JOINREP,
-    DUMMYLASTMSGTYPE
+    JOINREQ,    // JOINREQ, member addr, ?, member heartbeat
+    JOINREP,    // JOINREP, # of entries, entry_1, ... , entry_k (entry = addr, port, heartbeat, timestamp)
+    PING,       // PING, src entry, target entry
+    ACK,
+    IND_PING,
+    IND_ACK
+//    DUMMYLASTMSGTYPE
 };
 
 /**
@@ -55,6 +59,9 @@ private:
 	Params *par;
 	Member *memberNode;
 	char NULLADDR[6];
+    // Variables for failure detector
+    vector<MemberListEntry>::iterator cur_iter; // Current iterator for PING
+    MemberListEntry cur_ping_entry;
 
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
@@ -76,8 +83,19 @@ public:
 	void initMemberListTable(Member *memberNode);
 	void printAddress(Address *addr);
 	virtual ~MP1Node();
+
 private:
-    void updateMemberInList(MemberListEntry *memEnt);
+
+    /*
+     * Convert MemberListEntry to Address object
+     */
+    inline void entryToAddr(Address *addr, MemberListEntry *ent)
+    {
+        *(int *)(&addr->addr[0]) = ent->getid();
+        *(short *)(&addr->addr[4]) = ent->getport(); 
+    }
+
+    int updateMemberInList(MemberListEntry *memEnt);
     void getSelfMemberListEntry(MemberListEntry *memEnt);
     void fillMemberListEntryIntoMsg(char *msg, MemberListEntry *memEnt);
     void parseMsgMemberListEntry(char *msg, MemberListEntry *memEnt);

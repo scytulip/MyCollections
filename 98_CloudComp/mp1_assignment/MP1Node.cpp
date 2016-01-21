@@ -11,7 +11,8 @@
  * Note: You can change/add any functions in MP1Node.{h,cpp}
  */
 
-static const int SWIM_T_PRO = 50;   // SWIM protocol period
+static const int SWIM_T_ACK = 10;
+static const int SWIM_T_PRO = 50;   // SWIM protocol total timeout
 static const int SWIM_K_RAND = 4;   // SWIM K random processes
 static const int LEN_MEMENT_MSG = sizeof(int) + sizeof(short) + sizeof(long) * 2; // Length of MemberListEntry message segment
 
@@ -113,6 +114,8 @@ int MP1Node::initThisNode(Address *joinaddr) {
 	memberNode->timeOutCounter = -1;
     initMemberListTable(memberNode);
 
+    cur_iter = memberNode->memberList.begin();
+
     return 0;
 }
 
@@ -140,8 +143,8 @@ int MP1Node::introduceSelfToGroup(Address *joinaddr) {
 
         // create JOINREQ message: format of data is {struct Address myaddr}
         msg->msgType = JOINREQ;
-        memcpy((char *)(msg+1), &memberNode->addr.addr, sizeof(memberNode->addr.addr));
-        memcpy((char *)(msg+1) + 1 + sizeof(memberNode->addr.addr), &memberNode->heartbeat, sizeof(long));
+        memcpy((char *)msg + sizeof(MessageHdr), &memberNode->addr.addr, sizeof(memberNode->addr.addr));
+        memcpy((char *)msg + sizeof(MessageHdr) + 1 + sizeof(memberNode->addr.addr), &memberNode->heartbeat, sizeof(long));
 
 #ifdef DEBUGLOG
         sprintf(s, "Trying to join...");
@@ -167,6 +170,8 @@ int MP1Node::finishUpThisNode(){
    /*
     * Your code goes here
     */
+
+   return 0;
 }
 
 /**
@@ -223,40 +228,83 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
 	 * Your code goes here
 	 */
 
-    MessageHdr* msg = (MessageHdr *) data;
+    MemberListEntry selfEnt(
+            (int)memberNode->addr.addr[0], 
+            (short)memberNode->addr.addr[4], 
+            0, par->getcurrtime());
 
-    switch(msg->msgType)
+    switch(((MessageHdr *)data)->msgType)
     {
         case JOINREQ:
         {
             // Extract request address and add it into MemberList
             Address req_addr;
-            memcpy(&req_addr, (char *)(msg+1), sizeof(req_addr.addr));
+            memcpy(&req_addr, data + sizeof(MessageHdr), sizeof(req_addr.addr));
             
             MemberListEntry memEnt(
-                    (int)req_addr.addr[0], (short) req_addr.addr[4], 
-                    memberNode->heartbeat, par->getcurrtime());
-            updateMemberInList(&memEnt);
-            log->logNodeAdd(&memberNode->addr, &req_addr);
+                    (int)req_addr.addr[0], (short)req_addr.addr[4], 0, par->getcurrtime());
+            if(updateMemberInList(&memEnt))
+                log->logNodeAdd(&memberNode->addr, &req_addr);
             
-            // create JOINREP message: format of data is {struct Address myaddr}
-            MessageHdr* new_msg = (MessageHdr*) malloc(sizeof(MessageHdr));
-            new_msg->msgType = JOINREP;
-            Address intro_addr = getJoinAddress();
+            // create JOINREP message: include the list of all members
+            int numMembers = memberNode->memberList.size() + 1; // Add self
+            
+            size_t msg_size = sizeof(MessageHdr) + sizeof(int) + numMembers*LEN_MEMENT_MSG;
+            char* new_msg = (char *)malloc(msg_size * sizeof(char));
+            ((MessageHdr *)new_msg)->msgType = JOINREP;
 
-            // send JOINREP message to introducer member
-            emulNet->ENsend(&memberNode->addr, &intro_addr, (char *)new_msg, sizeof(MessageHdr));
+            *(int *)(new_msg + sizeof(MessageHdr)) = numMembers;
+            fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr) + sizeof(int), &selfEnt);
+
+            for (int i = 0; i < memberNode->memberList.size(); i++)
+            {
+                fillMemberListEntryIntoMsg(
+                        new_msg + sizeof(MessageHdr) + sizeof(int) + (i+1)*LEN_MEMENT_MSG,
+                        &memberNode->memberList[i]);
+            }
+
+            //send JOINREP message to introducer member
+            Address rep_addr;
+            for (int i = 0; i < memberNode->memberList.size(); i++)
+            {
+                entryToAddr( &rep_addr, &(memberNode->memberList[i]) );
+                emulNet->ENsend(&memberNode->addr, &rep_addr, new_msg, msg_size);
+            }
+
             free(new_msg);
             break;
         }
         case JOINREP:
         {
+            int numMembers = *(int *)(data + sizeof(MessageHdr));
+            MemberListEntry memEnt;
+            Address rep_addr;
+            
+            // Retrieve member list from the message
+            for (int i = 0; i < numMembers; i++)
+            {
+                parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr) + sizeof(int) + i*LEN_MEMENT_MSG, &memEnt);
+                entryToAddr( &rep_addr, &memEnt );
+                if (memEnt.getid() == (int)memberNode->addr.addr[0]) continue; // Don't add self into the list
+                if (updateMemberInList(&memEnt))
+                    log->logNodeAdd(&memberNode->addr, &rep_addr);
+            } 
+
+            break;
+        }
+        case PING:
+        {
+            break;
+        }
+        case ACK:
+        {
             break;
         }
     }
     
-    free(msg);
-    
+    free(data);
+
     return true;
 
 }
@@ -273,6 +321,48 @@ void MP1Node::nodeLoopOps() {
 	/*
 	 * Your code goes here
 	 */
+
+    MemberListEntry selfEnt(
+        (int)memberNode->addr.addr[0], 
+        (short)memberNode->addr.addr[4], 
+        0, par->getcurrtime());
+
+    long ping_timestamp = cur_ping_entry.gettimestamp();
+
+    if ( 0 == ping_timestamp ) // Require a new Ping
+    { 
+        // Start a new ping
+
+        if (cur_iter == memberNode->memberList.end())
+            cur_iter = memberNode->memberList.begin();
+        else
+            cur_iter ++;
+
+        if (cur_iter == memberNode->memberList.end()) // Empty list
+            return;
+
+        // Send direct PING
+        size_t msg_size = sizeof(MessageHdr) + 2 * LEN_MEMENT_MSG;
+        char* new_msg = (char *)malloc(msg_size * sizeof(char));
+        ((MessageHdr *)new_msg)->msgType = PING;
+
+        fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr), &selfEnt);
+        cur_ping_entry = (*cur_iter);
+        cur_ping_entry.settimestamp(par->getcurrtime());
+        fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr) + LEN_MEMENT_MSG, &cur_ping_entry);
+
+        Address rec_addr;
+        entryToAddr(&rec_addr, &cur_ping_entry);
+        emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
+        free(new_msg);
+
+    } else if ( par->getcurrtime() - cur_ping_entry.gettimestamp() > SWIM_T_ACK )
+    {
+        // ACK timeout, start indirect ping
+    } else if ( par->getcurrtime() - cur_ping_entry.gettimestamp() > SWIM_T_PRO )
+    {
+        // Protocol timeout, delete pinged node
+    }
 
     return;
 }
@@ -325,8 +415,9 @@ void MP1Node::printAddress(Address *addr)
  * FUNCTION NAME: updateMemberInList
  *
  * DESCRIPTION: Update a member in the memberList with the newest timestamp, if not existed, add a new one.
+ *              Return 1 if updated.
  */
-void MP1Node::updateMemberInList(MemberListEntry *memEnt)
+int MP1Node::updateMemberInList(MemberListEntry *memEnt)
 {
     // Find if the member is already in the list.
     vector<MemberListEntry>::iterator i;
@@ -338,21 +429,16 @@ void MP1Node::updateMemberInList(MemberListEntry *memEnt)
             {
                 (*i) = (*memEnt);
                 (*i).settimestamp(par->getcurrtime());
-            }
-            break;
+                return 1;
+            } else
+                return 0;
         }
     }
 
     // Add an entry if not in the list.
     if (i == memberNode->memberList.end())
         memberNode->memberList.push_back(*memEnt);
-
-#ifdef DEBUGLOG
-    static char s[1024];
-    sprintf(s, "Update %d:%d into memberList at time %d",
-            memEnt->getid(), memEnt->getport(), par->getcurrtime());
-    log->LOG(&memberNode->addr, s);
-#endif
+    return 1;
 }
 /**
  * FUNCTION NAME: getSelfMemberListEntry

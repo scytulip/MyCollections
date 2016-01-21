@@ -18,25 +18,97 @@
  7.0.0.0:0 [1] Trying to join...
  6.0.0.0:0 [1] Trying to join...
  5.0.0.0:0 [1] Trying to join...
- 1.0.0.0:0 [1] Update 2:0 into memberList at time 1
  1.0.0.0:0 [1] Node 2.0.0.0:0 joined at time 1
- 1.0.0.0:0 [1] Update 3:0 into memberList at time 1
  1.0.0.0:0 [1] Node 3.0.0.0:0 joined at time 1
- 1.0.0.0:0 [1] Update 4:0 into memberList at time 1
  1.0.0.0:0 [1] Node 4.0.0.0:0 joined at time 1
  10.0.0.0:0 [2] Trying to join...
  9.0.0.0:0 [2] Trying to join...
- 1.0.0.0:0 [2] Update 5:0 into memberList at time 2
+ 4.0.0.0:0 [2] Node 1.0.0.0:0 joined at time 2
+ 4.0.0.0:0 [2] Node 2.0.0.0:0 joined at time 2
+ 4.0.0.0:0 [2] Node 3.0.0.0:0 joined at time 2
+ 3.0.0.0:0 [2] Node 1.0.0.0:0 joined at time 2
+ 3.0.0.0:0 [2] Node 2.0.0.0:0 joined at time 2
+ 3.0.0.0:0 [2] Node 4.0.0.0:0 joined at time 2
+ 2.0.0.0:0 [2] Node 1.0.0.0:0 joined at time 2
+ 2.0.0.0:0 [2] Node 3.0.0.0:0 joined at time 2
+ 2.0.0.0:0 [2] Node 4.0.0.0:0 joined at time 2
  1.0.0.0:0 [2] Node 5.0.0.0:0 joined at time 2
- 1.0.0.0:0 [2] Update 6:0 into memberList at time 2
  1.0.0.0:0 [2] Node 6.0.0.0:0 joined at time 2
- 1.0.0.0:0 [2] Update 7:0 into memberList at time 2
  1.0.0.0:0 [2] Node 7.0.0.0:0 joined at time 2
- 1.0.0.0:0 [2] Update 8:0 into memberList at time 2
  1.0.0.0:0 [2] Node 8.0.0.0:0 joined at time 2
- 1.0.0.0:0 [3] Update 9:0 into memberList at time 3
+ 8.0.0.0:0 [3] Node 1.0.0.0:0 joined at time 3
+ 8.0.0.0:0 [3] Node 2.0.0.0:0 joined at time 3
+ 8.0.0.0:0 [3] Node 3.0.0.0:0 joined at time 3
+ 8.0.0.0:0 [3] Node 4.0.0.0:0 joined at time 3
+ 8.0.0.0:0 [3] Node 5.0.0.0:0 joined at time 3
+ 8.0.0.0:0 [3] Node 6.0.0.0:0 joined at time 3
+ 8.0.0.0:0 [3] Node 7.0.0.0:0 joined at time 3
+ 7.0.0.0:0 [3] Node 1.0.0.0:0 joined at time 3
+ 7.0.0.0:0 [3] Node 2.0.0.0:0 joined at time 3
+ 7.0.0.0:0 [3] Node 3.0.0.0:0 joined at time 3
+ 7.0.0.0:0 [3] Node 4.0.0.0:0 joined at time 3
+ 7.0.0.0:0 [3] Node 5.0.0.0:0 joined at time 3
+ 7.0.0.0:0 [3] Node 6.0.0.0:0 joined at time 3
+ 7.0.0.0:0 [3] Node 8.0.0.0:0 joined at time 3
+ 6.0.0.0:0 [3] Node 1.0.0.0:0 joined at time 3
+ 6.0.0.0:0 [3] Node 2.0.0.0:0 joined at time 3
+ 6.0.0.0:0 [3] Node 3.0.0.0:0 joined at time 3
+ 6.0.0.0:0 [3] Node 4.0.0.0:0 joined at time 3
+ 6.0.0.0:0 [3] Node 5.0.0.0:0 joined at time 3
+ 6.0.0.0:0 [3] Node 7.0.0.0:0 joined at time 3
+ 6.0.0.0:0 [3] Node 8.0.0.0:0 joined at time 3
+ 5.0.0.0:0 [3] Node 1.0.0.0:0 joined at time 3
+ 5.0.0.0:0 [3] Node 2.0.0.0:0 joined at time 3
+ 5.0.0.0:0 [3] Node 3.0.0.0:0 joined at time 3
+ 5.0.0.0:0 [3] Node 4.0.0.0:0 joined at time 3
+ 5.0.0.0:0 [3] Node 6.0.0.0:0 joined at time 3
+ 5.0.0.0:0 [3] Node 7.0.0.0:0 joined at time 3
+ 5.0.0.0:0 [3] Node 8.0.0.0:0 joined at time 3
+ 4.0.0.0:0 [3] Node 5.0.0.0:0 joined at time 3
+ 4.0.0.0:0 [3] Node 6.0.0.0:0 joined at time 3
+ 4.0.0.0:0 [3] Node 7.0.0.0:0 joined at time 3
+ 4.0.0.0:0 [3] Node 8.0.0.0:0 joined at time 3
+ 3.0.0.0:0 [3] Node 5.0.0.0:0 joined at time 3
+ 3.0.0.0:0 [3] Node 6.0.0.0:0 joined at time 3
+ 3.0.0.0:0 [3] Node 7.0.0.0:0 joined at time 3
+ 3.0.0.0:0 [3] Node 8.0.0.0:0 joined at time 3
+ 2.0.0.0:0 [3] Node 5.0.0.0:0 joined at time 3
+ 2.0.0.0:0 [3] Node 6.0.0.0:0 joined at time 3
+ 2.0.0.0:0 [3] Node 7.0.0.0:0 joined at time 3
+ 2.0.0.0:0 [3] Node 8.0.0.0:0 joined at time 3
  1.0.0.0:0 [3] Node 9.0.0.0:0 joined at time 3
- 1.0.0.0:0 [3] Update 10:0 into memberList at time 3
  1.0.0.0:0 [3] Node 10.0.0.0:0 joined at time 3
- 8.0.0.0:0 [100] Node failed at time=100
+ 10.0.0.0:0 [4] Node 1.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 2.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 3.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 4.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 5.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 6.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 7.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 8.0.0.0:0 joined at time 4
+ 10.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 1.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 2.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 3.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 4.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 5.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 6.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 7.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 8.0.0.0:0 joined at time 4
+ 9.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 8.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 8.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 7.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 7.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 6.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 6.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 5.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 5.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 4.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 4.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 3.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 3.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 2.0.0.0:0 [4] Node 9.0.0.0:0 joined at time 4
+ 2.0.0.0:0 [4] Node 10.0.0.0:0 joined at time 4
+ 5.0.0.0:0 [100] Node failed at time=100
  1.0.0.0:0 [500] @@time=500
