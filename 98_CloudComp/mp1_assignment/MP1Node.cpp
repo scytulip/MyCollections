@@ -2,7 +2,7 @@
  * FILE NAME: MP1Node.cpp
  *
  * DESCRIPTION: Membership protocol run by this Node.
- * 				Definition of MP1Node class functions.
+ *              Definition of MP1Node class functions.
  **********************************/
 
 #include "MP1Node.h"
@@ -11,25 +11,20 @@
  * Note: You can change/add any functions in MP1Node.{h,cpp}
  */
 
-static const int SWIM_T_ACK = 10;
-static const int SWIM_T_PRO = 50;   // SWIM protocol total timeout
-static const int SWIM_K_RAND = 4;   // SWIM K random processes
-static const int LEN_MEMENT_MSG = sizeof(int) + sizeof(short) + sizeof(long) * 2; // Length of MemberListEntry message segment
-
 /**
  * Overloaded Constructor of the MP1Node class
  * You can add new members to the class if you think it
  * is necessary for your logic to work
  */
 MP1Node::MP1Node(Member *member, Params *params, EmulNet *emul, Log *log, Address *address) {
-	for( int i = 0; i < 6; i++ ) {
-		NULLADDR[i] = 0;
-	}
-	this->memberNode = member;
-	this->emulNet = emul;
-	this->log = log;
-	this->par = params;
-	this->memberNode->addr = *address;
+    for( int i = 0; i < 6; i++ ) {
+        NULLADDR[i] = 0;
+    }
+    this->memberNode = member;
+    this->emulNet = emul;
+    this->log = log;
+    this->par = params;
+    this->memberNode->addr = *address;
 }
 
 /**
@@ -41,14 +36,14 @@ MP1Node::~MP1Node() {}
  * FUNCTION NAME: recvLoop
  *
  * DESCRIPTION: This function receives message from the network and pushes into the queue
- * 				This function is called by a node to receive messages currently waiting for it
+ *              This function is called by a node to receive messages currently waiting for it
  */
 int MP1Node::recvLoop() {
     if ( memberNode->bFailed ) {
-    	return false;
+        return false;
     }
     else {
-    	return emulNet->ENrecv(&(memberNode->addr), enqueueWrapper, NULL, 1, &(memberNode->mp1q));
+        return emulNet->ENrecv(&(memberNode->addr), enqueueWrapper, NULL, 1, &(memberNode->mp1q));
     }
 }
 
@@ -58,16 +53,16 @@ int MP1Node::recvLoop() {
  * DESCRIPTION: Enqueue the message from Emulnet into the queue
  */
 int MP1Node::enqueueWrapper(void *env, char *buff, int size) {
-	Queue q;
-	return q.enqueue((queue<q_elt> *)env, (void *)buff, size);
+    Queue q;
+    return q.enqueue((queue<q_elt> *)env, (void *)buff, size);
 }
 
 /**
  * FUNCTION NAME: nodeStart
  *
  * DESCRIPTION: This function bootstraps the node
- * 				All initializations routines for a member.
- * 				Called by the application layer.
+ *              All initializations routines for a member.
+ *              Called by the application layer.
  */
 void MP1Node::nodeStart(char *servaddrstr, short servport) {
     Address joinaddr;
@@ -98,23 +93,23 @@ void MP1Node::nodeStart(char *servaddrstr, short servport) {
  * DESCRIPTION: Find out who I am and start up
  */
 int MP1Node::initThisNode(Address *joinaddr) {
-	/*
-	 * This function is partially implemented and may require changes
-	 */
-	//int id = *(int*)(&memberNode->addr.addr);
-	//int port = *(short*)(&memberNode->addr.addr[4]);
+    /*
+     * This function is partially implemented and may require changes
+     */
+    //int id = *(int*)(&memberNode->addr.addr);
+    //int port = *(short*)(&memberNode->addr.addr[4]);
 
-	memberNode->bFailed = false;
-	memberNode->inited = true;
-	memberNode->inGroup = false;
+    memberNode->bFailed = false;
+    memberNode->inited = true;
+    memberNode->inGroup = false;
     // node is up!
-	memberNode->nnb = 0;
-	memberNode->heartbeat = 0;
-	memberNode->pingCounter = TFAIL;
-	memberNode->timeOutCounter = -1;
+    memberNode->nnb = 0;
+    memberNode->heartbeat = 0;
+    memberNode->pingCounter = TFAIL;
+    memberNode->timeOutCounter = -1;
     initMemberListTable(memberNode);
 
-    cur_iter = memberNode->memberList.begin();
+    cur_list_idx = 0;
 
     return 0;
 }
@@ -125,7 +120,7 @@ int MP1Node::initThisNode(Address *joinaddr) {
  * DESCRIPTION: Join the distributed system
  */
 int MP1Node::introduceSelfToGroup(Address *joinaddr) {
-	MessageHdr *msg;
+    MessageHdr *msg;
 #ifdef DEBUGLOG
     static char s[1024];
 #endif
@@ -178,11 +173,11 @@ int MP1Node::finishUpThisNode(){
  * FUNCTION NAME: nodeLoop
  *
  * DESCRIPTION: Executed periodically at each member
- * 				Check your messages in queue and perform membership protocol duties
+ *              Check your messages in queue and perform membership protocol duties
  */
 void MP1Node::nodeLoop() {
     if (memberNode->bFailed) {
-    	return;
+        return;
     }
 
     // Check my messages
@@ -190,7 +185,7 @@ void MP1Node::nodeLoop() {
 
     // Wait until you're in the group...
     if( !memberNode->inGroup ) {
-    	return;
+        return;
     }
 
     // ...then jump in and share your responsibilites!
@@ -210,10 +205,10 @@ void MP1Node::checkMessages() {
 
     // Pop waiting messages from memberNode's mp1q
     while ( !memberNode->mp1q.empty() ) {
-    	ptr = memberNode->mp1q.front().elt;
-    	size = memberNode->mp1q.front().size;
-    	memberNode->mp1q.pop();
-    	recvCallBack((void *)memberNode, (char *)ptr, size);
+        ptr = memberNode->mp1q.front().elt;
+        size = memberNode->mp1q.front().size;
+        memberNode->mp1q.pop();
+        recvCallBack((void *)memberNode, (char *)ptr, size);
     }
     return;
 }
@@ -224,9 +219,9 @@ void MP1Node::checkMessages() {
  * DESCRIPTION: Message handler for different message types
  */
 bool MP1Node::recvCallBack(void *env, char *data, int size ) {
-	/*
-	 * Your code goes here
-	 */
+    /*
+     * Your code goes here
+     */
 
     MemberListEntry selfEnt(
             (int)memberNode->addr.addr[0], 
@@ -295,10 +290,127 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
         }
         case PING:
         {
+            MemberListEntry srcEnt, tgtEnt;
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr), &srcEnt);
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr) + LEN_MEMENT_MSG, &tgtEnt);
+                        
+            if (tgtEnt.getid() == selfEnt.getid()) // I'm the target -> update the source in the list and send ACK back
+            {
+                updateMemberInList(&srcEnt);
+                
+                size_t msg_size = sizeof(MessageHdr) + 2 * LEN_MEMENT_MSG;
+                char* new_msg = (char *)malloc(msg_size * sizeof(char));
+                ((MessageHdr *)new_msg)->msgType = ACK;
+
+                tgtEnt.settimestamp(par->getcurrtime());   // Update the discover timestamp of the target.
+                fillMsgSrcTgt(new_msg, &srcEnt, &tgtEnt);
+                
+                Address rec_addr;
+                entryToAddr(&rec_addr, &srcEnt);
+                emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
+                free(new_msg);
+            }
+                        
             break;
         }
         case ACK:
         {
+            MemberListEntry srcEnt, tgtEnt;
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr), &srcEnt);
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr) + LEN_MEMENT_MSG, &tgtEnt);
+            
+            if (srcEnt.getid() == selfEnt.getid()
+                && tgtEnt.getid() == cur_ping_entry.getid()) // It's the ACK response to current ping.
+            {
+                updateMemberInList(&tgtEnt);
+                cur_ping_entry.settimestamp(0);     // ACK is received. Ping procedure ends.    
+            }
+            
+            break;
+        }
+        case IND_PING:
+        {
+            MemberListEntry srcEnt, tgtEnt, rlyEnt;
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr), &srcEnt);
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr) + LEN_MEMENT_MSG, &tgtEnt);
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr) + 2*LEN_MEMENT_MSG, &rlyEnt);
+                        
+            if (tgtEnt.getid() == selfEnt.getid()) // I'm the target, reply IND_ACK to the relay.
+            {
+                updateMemberInList(&srcEnt);
+                updateMemberInList(&rlyEnt);
+                
+                size_t msg_size = sizeof(MessageHdr) + 3 * LEN_MEMENT_MSG;
+                char* new_msg = (char *)malloc(msg_size * sizeof(char));
+                ((MessageHdr *)new_msg)->msgType = IND_ACK;
+
+                tgtEnt.settimestamp(par->getcurrtime());   // Update the discover timestamp of the target.
+                fillMsgSrcTgtRly(new_msg, &srcEnt, &tgtEnt, &rlyEnt);
+                
+                Address rec_addr;
+                entryToAddr(&rec_addr, &rlyEnt);
+                emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
+                free(new_msg);
+                
+            } else if (rlyEnt.getid() == selfEnt.getid()) // I'm the relay, forward IND_PING to the target.
+            {
+                updateMemberInList(&srcEnt);
+                
+                size_t msg_size = sizeof(MessageHdr) + 3 * LEN_MEMENT_MSG;
+                char* new_msg = (char *)malloc(msg_size * sizeof(char));
+                ((MessageHdr *)new_msg)->msgType = IND_PING;
+
+                rlyEnt.settimestamp(par->getcurrtime());   // Update the discover timestamp of the relay.
+                fillMsgSrcTgtRly(new_msg, &srcEnt, &tgtEnt, &rlyEnt);
+                
+                Address rec_addr;
+                entryToAddr(&rec_addr, &tgtEnt);
+                emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
+                free(new_msg);
+            }
+            
+            break;
+        }
+        case IND_ACK:
+        {
+            MemberListEntry srcEnt, tgtEnt, rlyEnt;
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr), &srcEnt);
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr) + LEN_MEMENT_MSG, &tgtEnt);
+            parseMsgMemberListEntry(
+                        data + sizeof(MessageHdr) + 2*LEN_MEMENT_MSG, &rlyEnt);
+                        
+            if (srcEnt.getid() == selfEnt.getid()
+                && tgtEnt.getid() == cur_ping_entry.getid()) // It's the IND_ACK response to current ping.
+            {
+                updateMemberInList(&tgtEnt);
+                updateMemberInList(&rlyEnt);
+                cur_ping_entry.settimestamp(0);     // ACK is received. Ping procedure ends.    
+            } else if (rlyEnt.getid() == selfEnt.getid()) // It's the IND_ACK sent to the relay.
+            {
+                updateMemberInList(&tgtEnt);
+                
+                size_t msg_size = sizeof(MessageHdr) + 3 * LEN_MEMENT_MSG;
+                char* new_msg = (char *)malloc(msg_size * sizeof(char));
+                ((MessageHdr *)new_msg)->msgType = IND_ACK;
+
+                rlyEnt.settimestamp(par->getcurrtime());   // Update the discover timestamp of the relay.
+                fillMsgSrcTgtRly(new_msg, &srcEnt, &tgtEnt, &rlyEnt);
+                
+                Address rec_addr;
+                entryToAddr(&rec_addr, &srcEnt);
+                emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
+                free(new_msg);
+            }
+            
             break;
         }
     }
@@ -313,14 +425,14 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
  * FUNCTION NAME: nodeLoopOps
  *
  * DESCRIPTION: Check if any node hasn't responded within a timeout period and then delete
- * 				the nodes
- * 				Propagate your membership list
+ *              the nodes
+ *              Propagate your membership list
  */
 void MP1Node::nodeLoopOps() {
 
-	/*
-	 * Your code goes here
-	 */
+    /*
+     * Your code goes here
+     */
 
     MemberListEntry selfEnt(
         (int)memberNode->addr.addr[0], 
@@ -332,36 +444,87 @@ void MP1Node::nodeLoopOps() {
     if ( 0 == ping_timestamp ) // Require a new Ping
     { 
         // Start a new ping
-
-        if (cur_iter == memberNode->memberList.end())
-            cur_iter = memberNode->memberList.begin();
+        if (0 == memberNode->memberList.size()) return; // Empty list
+        
+        if (cur_list_idx >= memberNode->memberList.size())
+            cur_list_idx = 0;
         else
-            cur_iter ++;
-
-        if (cur_iter == memberNode->memberList.end()) // Empty list
-            return;
-
+            cur_list_idx ++;
+        
         // Send direct PING
         size_t msg_size = sizeof(MessageHdr) + 2 * LEN_MEMENT_MSG;
         char* new_msg = (char *)malloc(msg_size * sizeof(char));
         ((MessageHdr *)new_msg)->msgType = PING;
-
-        fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr), &selfEnt);
-        cur_ping_entry = (*cur_iter);
+        
+        cur_ping_entry = memberNode->memberList[cur_list_idx];
         cur_ping_entry.settimestamp(par->getcurrtime());
-        fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr) + LEN_MEMENT_MSG, &cur_ping_entry);
+        fillMsgSrcTgt(new_msg, &selfEnt, &cur_ping_entry);
 
         Address rec_addr;
         entryToAddr(&rec_addr, &cur_ping_entry);
         emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
         free(new_msg);
 
-    } else if ( par->getcurrtime() - cur_ping_entry.gettimestamp() > SWIM_T_ACK )
+    } else if ( par->getcurrtime() - ping_timestamp > SWIM_T_ACK )
     {
         // ACK timeout, start indirect ping
-    } else if ( par->getcurrtime() - cur_ping_entry.gettimestamp() > SWIM_T_PRO )
+        size_t sel_size = memberNode->memberList.size() * sizeof(bool);
+        bool *sel = (bool *) malloc(sel_size);
+        
+        if (memberNode->memberList.size()-1 <= SWIM_K_RAND)
+            memset(sel, 1, sel_size);
+        else
+        {
+            // Random selection of the relay node
+            int c1 = 0;
+            int idx;
+            while (c1 < SWIM_K_RAND)
+            {
+                idx = rand() % memberNode->memberList.size();
+                if (!sel[idx] && idx!=cur_list_idx)
+                {
+                    sel[idx] = true;
+                    c1 ++;
+                }
+            }
+        }
+        
+        // Send indirect pings
+        MemberListEntry rlyEnt;
+        size_t msg_size = sizeof(MessageHdr) + 3 * LEN_MEMENT_MSG;
+        char* new_msg = (char *)malloc(msg_size * sizeof(char));
+        
+        ((MessageHdr *)new_msg)->msgType = IND_PING;
+        fillMsgSrcTgtRly(new_msg, &selfEnt, &cur_ping_entry, &rlyEnt);
+        
+        for (int i = 0; i < memberNode->memberList.size(); i++)
+            if (sel[i] && i!=cur_list_idx)
+            {
+                rlyEnt = memberNode->memberList[i];
+                fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr) + 2*LEN_MEMENT_MSG, &rlyEnt);
+                
+                Address rec_addr;
+                entryToAddr(&rec_addr, &rlyEnt);
+                emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
+            }
+            
+        free(new_msg);
+        free(sel);
+        
+    } else if ( par->getcurrtime() - ping_timestamp > SWIM_T_PRO )
     {
         // Protocol timeout, delete pinged node
+        memberNode->memberList.erase(
+                memberNode->memberList.begin() + cur_list_idx); // For simplicity
+        cur_ping_entry.setid(0);
+        cur_ping_entry.setport(0);
+        cur_ping_entry.setheartbeat(0);
+        cur_ping_entry.settimestamp(0);
+        
+        Address ping_addr;
+        entryToAddr(&ping_addr, &cur_ping_entry);
+        log->logNodeRemove(&memberNode->addr, &ping_addr);
+        
     }
 
     return;
@@ -373,7 +536,7 @@ void MP1Node::nodeLoopOps() {
  * DESCRIPTION: Function checks if the address is NULL
  */
 int MP1Node::isNullAddress(Address *addr) {
-	return (memcmp(addr->addr, NULLADDR, 6) == 0 ? 1 : 0);
+    return (memcmp(addr->addr, NULLADDR, 6) == 0 ? 1 : 0);
 }
 
 /**
@@ -397,7 +560,7 @@ Address MP1Node::getJoinAddress() {
  * DESCRIPTION: Initialize the membership list
  */
 void MP1Node::initMemberListTable(Member *memberNode) {
-	memberNode->memberList.clear();
+    memberNode->memberList.clear();
 }
 
 /**

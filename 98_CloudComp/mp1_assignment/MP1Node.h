@@ -24,6 +24,11 @@
 /*
  * Note: You can change/add any functions in MP1Node.{h,cpp}
  */
+ 
+static const int SWIM_T_ACK = 10;
+static const int SWIM_T_PRO = 50;   // SWIM protocol total timeout
+static const int SWIM_K_RAND = 4;   // SWIM K random processes
+static const int LEN_MEMENT_MSG = sizeof(int) + sizeof(short) + sizeof(long) * 2; // Length of MemberListEntry message segment
 
 /**
  * Message Types
@@ -32,9 +37,9 @@ enum MsgTypes{
     JOINREQ,    // JOINREQ, member addr, ?, member heartbeat
     JOINREP,    // JOINREP, # of entries, entry_1, ... , entry_k (entry = addr, port, heartbeat, timestamp)
     PING,       // PING, src entry, target entry
-    ACK,
-    IND_PING,
-    IND_ACK
+    ACK,        // ACK, src entry, target entry
+    IND_PING,   // IND_PING, src entry, target entry, relay entry
+    IND_ACK,    // IND_ACK, src entry, target entry, relay entry
 //    DUMMYLASTMSGTYPE
 };
 
@@ -60,7 +65,7 @@ private:
 	Member *memberNode;
 	char NULLADDR[6];
     // Variables for failure detector
-    vector<MemberListEntry>::iterator cur_iter; // Current iterator for PING
+    int cur_list_idx; // Current index of the MemberList for PING
     MemberListEntry cur_ping_entry;
 
 public:
@@ -93,6 +98,24 @@ private:
     {
         *(int *)(&addr->addr[0]) = ent->getid();
         *(short *)(&addr->addr[4]) = ent->getport(); 
+    }
+    
+    /*
+     * Fill in message with (source entry, target entry)
+     */
+    inline void fillMsgSrcTgt(char *new_msg, MemberListEntry *srcEnt, MemberListEntry *tgtEnt)
+    {
+        fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr), srcEnt);
+        fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr) + LEN_MEMENT_MSG, tgtEnt);
+    }
+    
+    /*
+     * Fill in message with (source entry, target entry, relay entry)
+     */
+    inline void fillMsgSrcTgtRly(char *new_msg, MemberListEntry *srcEnt, MemberListEntry *tgtEnt, MemberListEntry *rlyEnt)
+    {
+        fillMsgSrcTgt(new_msg, srcEnt, tgtEnt);
+        fillMemberListEntryIntoMsg(new_msg + sizeof(MessageHdr) + 2*LEN_MEMENT_MSG, rlyEnt);
     }
 
     int updateMemberInList(MemberListEntry *memEnt);
