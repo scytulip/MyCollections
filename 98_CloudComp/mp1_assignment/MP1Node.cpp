@@ -267,24 +267,28 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
             }
 
             free(new_msg);
+            
             break;
         }
         case JOINREP:
         {
             int numMembers = *(int *)(data + sizeof(MessageHdr));
             MemberListEntry memEnt;
-            Address rep_addr;
             
             // Retrieve member list from the message
             for (int i = 0; i < numMembers; i++)
             {
                 parseMsgMemberListEntry(
                         data + sizeof(MessageHdr) + sizeof(int) + i*LEN_MEMENT_MSG, &memEnt);
+                
+                if (memEnt.getid() != selfEnt.getid()) updateMemberInList(&memEnt); // Don't add self into the list
+            
+                Address rep_addr;
                 entryToAddr( &rep_addr, &memEnt );
-                if (memEnt.getid() == (int)memberNode->addr.addr[0]) continue; // Don't add self into the list
-                if (updateMemberInList(&memEnt))
-                    log->logNodeAdd(&memberNode->addr, &rep_addr);
+                log->logNodeAdd(&memberNode->addr, &rep_addr);
             } 
+            
+            memberNode->inGroup = true;
 
             break;
         }
@@ -311,6 +315,8 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
                 entryToAddr(&rec_addr, &srcEnt);
                 emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
                 free(new_msg);
+                
+                // printf("[%d] Node %d is pinged by %d.\n", par->getcurrtime(), tgtEnt.getid(), srcEnt.getid());
             }
                         
             break;
@@ -328,6 +334,8 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
             {
                 updateMemberInList(&tgtEnt);
                 cur_ping_entry.settimestamp(0);     // ACK is received. Ping procedure ends.    
+                
+                // printf("[%d] Node %d received ACK from %d.\n", par->getcurrtime(), srcEnt.getid(), tgtEnt.getid());
             }
             
             break;
@@ -438,7 +446,7 @@ void MP1Node::nodeLoopOps() {
         (int)memberNode->addr.addr[0], 
         (short)memberNode->addr.addr[4], 
         0, par->getcurrtime());
-
+    
     long ping_timestamp = cur_ping_entry.gettimestamp();
 
     if ( 0 == ping_timestamp ) // Require a new Ping
@@ -446,10 +454,11 @@ void MP1Node::nodeLoopOps() {
         // Start a new ping
         if (0 == memberNode->memberList.size()) return; // Empty list
         
-        if (cur_list_idx >= memberNode->memberList.size())
-            cur_list_idx = 0;
-        else
-            cur_list_idx ++;
+        cur_list_idx = rand() % memberNode->memberList.size();
+        //if (cur_list_idx >= memberNode->memberList.size()-1)
+        //    cur_list_idx = 0;
+        //else
+        //    cur_list_idx ++;
         
         // Send direct PING
         size_t msg_size = sizeof(MessageHdr) + 2 * LEN_MEMENT_MSG;
@@ -464,7 +473,24 @@ void MP1Node::nodeLoopOps() {
         entryToAddr(&rec_addr, &cur_ping_entry);
         emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
         free(new_msg);
+        
+        // printf("[%d] %d pings %d.\n", par->getcurrtime(), selfEnt.getid(), cur_ping_entry.getid());
 
+    } else if ( par->getcurrtime() - ping_timestamp > SWIM_T_PRO )
+    {
+        // Protocol timeout, delete pinged node
+        memberNode->memberList.erase(
+                memberNode->memberList.begin() + cur_list_idx); // For simplicity
+        
+        Address ping_addr;
+        entryToAddr(&ping_addr, &cur_ping_entry);
+        log->logNodeRemove(&memberNode->addr, &ping_addr);
+        
+        cur_ping_entry.setid(0);
+        cur_ping_entry.setport(0);
+        cur_ping_entry.setheartbeat(0);
+        cur_ping_entry.settimestamp(0);
+        
     } else if ( par->getcurrtime() - ping_timestamp > SWIM_T_ACK )
     {
         // ACK timeout, start indirect ping
@@ -506,25 +532,12 @@ void MP1Node::nodeLoopOps() {
                 Address rec_addr;
                 entryToAddr(&rec_addr, &rlyEnt);
                 emulNet->ENsend(&memberNode->addr, &rec_addr, new_msg, msg_size);
+                
+                // printf("[%d] %d->%d->%d.\n", par->getcurrtime(), selfEnt.getid(), rlyEnt.getid(), cur_ping_entry.getid());
             }
             
         free(new_msg);
-        free(sel);
-        
-    } else if ( par->getcurrtime() - ping_timestamp > SWIM_T_PRO )
-    {
-        // Protocol timeout, delete pinged node
-        memberNode->memberList.erase(
-                memberNode->memberList.begin() + cur_list_idx); // For simplicity
-        cur_ping_entry.setid(0);
-        cur_ping_entry.setport(0);
-        cur_ping_entry.setheartbeat(0);
-        cur_ping_entry.settimestamp(0);
-        
-        Address ping_addr;
-        entryToAddr(&ping_addr, &cur_ping_entry);
-        log->logNodeRemove(&memberNode->addr, &ping_addr);
-        
+        free(sel); 
     }
 
     return;

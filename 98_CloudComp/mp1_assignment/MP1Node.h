@@ -26,8 +26,8 @@
  */
  
 static const int SWIM_T_ACK = 10;
-static const int SWIM_T_PRO = 50;   // SWIM protocol total timeout
-static const int SWIM_K_RAND = 4;   // SWIM K random processes
+static const int SWIM_T_PRO = 40;   // SWIM protocol total timeout
+static const int SWIM_K_RAND = 3;   // SWIM K random processes
 static const int LEN_MEMENT_MSG = sizeof(int) + sizeof(short) + sizeof(long) * 2; // Length of MemberListEntry message segment
 
 /**
