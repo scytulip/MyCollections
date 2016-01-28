@@ -25,7 +25,4 @@ cc_binary(
     deps = [
         "//third_party:gflags",
     ],
-    copts = [
-        "-Ithird_party/gflags_hdr",
-    ],
 )
