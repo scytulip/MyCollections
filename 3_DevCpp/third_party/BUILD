@@ -85,3 +85,41 @@ cc_library(
       "googletest/googletest/samples/sample%s.h" % num,
     ],
 ) for num in ["1", "2", "4"]]
+
+cc_library(
+    name = "googletest_sample3",
+    hdrs = [
+      "googletest/googletest/samples/sample3-inl.h",
+    ],
+)
+
+[cc_test(
+    name = "googletest_sample%d_unittest" % num,
+    srcs = [
+      "googletest/googletest/samples/prime_tables.h",
+      "googletest/googletest/samples/sample%d_unittest.cc" % num,
+      "googletest/googletest/src/gtest_main.cc",
+    ],
+    deps = [
+      ":googletest",
+      ":googletest_sample1",
+      ":googletest_sample2",
+      ":googletest_sample3",
+      ":googletest_sample4",
+    ],
+) for num in range(1, 9)]
+
+[cc_test(
+    name = "googletest_sample%d_unittest" % num,
+    srcs = [
+      "googletest/googletest/samples/prime_tables.h",
+      "googletest/googletest/samples/sample%d_unittest.cc" % num,
+    ],
+    deps = [
+      ":googletest",
+      ":googletest_sample1",
+      ":googletest_sample2",
+      ":googletest_sample3",
+      ":googletest_sample4",
+    ],
+) for num in range(9, 11)]
