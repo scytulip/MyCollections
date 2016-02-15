@@ -1,0 +1,4 @@
+bind(
+    name = "protobuf_clib",
+    actual = "//google/protobuf:protoc_lib",
+)

@@ -10,3 +10,15 @@
 [submodule "3_DevCpp/third_party/grpc"]
 	path = 3_DevCpp/third_party/grpc
 	url = https://github.com/grpc/grpc.git
+[submodule "3_DevCpp/google/grpc"]
+	path = 3_DevCpp/google/grpc
+	url = https://github.com/grpc/grpc.git
+[submodule "3_DevCpp/google/gflags"]
+	path = 3_DevCpp/google/gflags
+	url = https://github.com/gflags/gflags.git
+[submodule "3_DevCpp/google/googletest"]
+	path = 3_DevCpp/google/googletest
+	url = https://github.com/google/googletest.git
+[submodule "3_DevCpp/google/protobuf"]
+	path = 3_DevCpp/google/protobuf
+	url = https://github.com/google/protobuf.git
