@@ -2,3 +2,13 @@ bind(
     name = "protobuf_clib",
     actual = "//google/protobuf:protoc_lib",
 )
+
+bind(
+    name = "gtest",
+    actual = "//google:googlemock",
+)
+
+bind(
+    name = "gtest_main",
+    actual = "//google:googlemock_main",
+)

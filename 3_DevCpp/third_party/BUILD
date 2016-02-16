@@ -22,10 +22,3 @@ cc_library(
     ],
 )
 
-# link to Protocol Buffers
-cc_library(
-    name = "protobuf_clib",
-    deps = [
-        "//google/protobuf:protoc_lib",
-    ],
-)

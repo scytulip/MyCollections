@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 # gflags
 # https://github.com/gflags/gflags
 cc_library(
@@ -53,6 +55,15 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "googletest_main",
+    srcs = ["googletest/googletest/src/gtest_main.cc"],
+    linkopts = [
+      "-pthread",
+    ],
+    deps = [":googletest"],
+)
+
 [cc_library(
     name = "googletest_sample%s" % num,
     srcs = [
@@ -75,10 +86,9 @@ cc_library(
     srcs = [
       "googletest/googletest/samples/prime_tables.h",
       "googletest/googletest/samples/sample%d_unittest.cc" % num,
-      "googletest/googletest/src/gtest_main.cc",
     ],
     deps = [
-      ":googletest",
+      ":googletest_main",
       ":googletest_sample1",
       ":googletest_sample2",
       ":googletest_sample3",
@@ -100,3 +110,91 @@ cc_library(
       ":googletest_sample4",
     ],
 ) for num in range(9, 11)]
+
+# Google Mock
+# https://github.com/google/googletest
+cc_library(
+    name = "googlemock",
+    includes = [
+      "googletest/googlemock/include",
+    ],
+    srcs = [
+      "googletest/googlemock/src/gmock-cardinalities.cc",
+      "googletest/googlemock/src/gmock-internal-utils.cc",
+      "googletest/googlemock/src/gmock-matchers.cc",
+      "googletest/googlemock/src/gmock-spec-builders.cc",
+      "googletest/googlemock/src/gmock.cc",
+    ],
+    hdrs = glob(
+      ["googletest/googlemock/include/**/*.h"]
+    ),
+    linkopts = [
+      "-pthread",
+    ],
+    deps = [":googletest"],
+)
+
+cc_library(
+    name = "googlemock_main",
+    srcs = [
+      "googletest/googlemock/src/gmock_main.cc"
+    ],
+    linkopts = [
+      "-pthread",
+    ],
+    deps = [":googlemock"],
+)
+
+cc_test(
+    name = "gmock-spec-builders_test",
+    srcs = [
+      "googletest/googlemock/test/gmock-spec-builders_test.cc",
+    ],
+    deps = [
+      ":googlemock",
+    ],
+    size = "small",
+)
+
+cc_test(
+    name = "gmock_link_test",
+    srcs = [
+      "googletest/googlemock/test/gmock_link2_test.cc",
+      "googletest/googlemock/test/gmock_link_test.cc",
+      "googletest/googlemock/test/gmock_link_test.h",
+    ],
+    includes = [
+      "googletest/googlemock/",
+    ],
+    deps = [
+      ":googlemock_main",
+    ],
+    size = "small",
+)
+
+cc_test(
+    name = "gmock_test",
+    srcs = [
+      "googletest/googlemock/test/gmock-actions_test.cc",
+      "googletest/googlemock/test/gmock-cardinalities_test.cc",
+      "googletest/googlemock/test/gmock-generated-actions_test.cc",
+      "googletest/googlemock/test/gmock-generated-function-mockers_test.cc",
+      "googletest/googlemock/test/gmock-generated-internal-utils_test.cc",
+      "googletest/googlemock/test/gmock-generated-matchers_test.cc",
+      "googletest/googlemock/test/gmock-internal-utils_test.cc",
+      "googletest/googlemock/test/gmock-matchers_test.cc",
+      "googletest/googlemock/test/gmock-more-actions_test.cc",
+      "googletest/googlemock/test/gmock-nice-strict_test.cc",
+      "googletest/googlemock/test/gmock-port_test.cc",
+      "googletest/googlemock/test/gmock-spec-builders_test.cc",
+      "googletest/googlemock/test/gmock_test.cc",
+    ],
+    includes = [
+      "googletest/googlemock/",
+      "googletest/googletest/",
+    ],
+    deps = [
+      ":googlemock_main",
+      ":googletest",
+    ],
+)
