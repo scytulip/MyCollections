@@ -7,7 +7,7 @@ SYS_INC = "usr/include/"
 cc_library(
     name = "opencv2",
     srcs = glob([
-        "usr/local/lib/libopencv_*.so"
+      "usr/local/lib/libopencv_*.so"
     ]),
     hdrs = glob([
         LOCAL_INC + "opencv2/**/*.h*",
@@ -16,9 +16,38 @@ cc_library(
         SYS_INC + "x86_64-linux-gnu/c++/4.8/**/*.h*"
     ]),
     copts = [
-      "-Iexternal/" + LOCAL_INC,
-      "-Iexternal/" + SYS_INC + "c++/4.8",
-      "-Iexternal/" + SYS_INC + "x86_64-linux-gnu/c++/4.8",
+      "-Ithird_party/" + LOCAL_INC,
+      "-Ithird_party/" + SYS_INC + "c++/4.8",
+      "-Ithird_party/" + SYS_INC + "x86_64-linux-gnu/c++/4.8",
     ],
 )
 
+# Openssl - libssl (external)
+# sudo apt-get install libssl-dev
+
+cc_library(
+    name = "libssl",
+    srcs = [
+      "usr/lib/x86_64-linux-gnu/libssl.so",
+    ],
+    hdrs = glob([
+      "usr/include/openssl/*.h",
+    ]),
+)
+
+# zlib
+# https://github.com/madler/zlib.git
+
+cc_library(
+    name = "zlib",
+    srcs = glob([
+      "zlib/*.c"
+    ]),
+    hdrs = glob([
+      "zlib/*.h"
+    ]),
+    includes = ["zlib/"],
+    linkopts = [
+      "-pthread",
+    ],
+)
