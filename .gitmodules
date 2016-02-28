@@ -28,3 +28,6 @@
 [submodule "3_DevCpp/third_party/zlib"]
 	path = 3_DevCpp/third_party/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "3_DevCpp/third_party/curlcpp"]
+	path = 3_DevCpp/third_party/curlcpp
+	url = https://github.com/JosephP91/curlcpp.git
