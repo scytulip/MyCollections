@@ -31,3 +31,9 @@
 [submodule "3_DevCpp/third_party/curlcpp"]
 	path = 3_DevCpp/third_party/curlcpp
 	url = https://github.com/JosephP91/curlcpp.git
+[submodule "3_DevCpp/third_party/boost"]
+	path = 3_DevCpp/third_party/boost
+	url = https://github.com/boostorg/boost.git
+[submodule "3_DevCpp/third_party/asio"]
+	path = 3_DevCpp/third_party/asio
+	url = https://github.com/chriskohlhoff/asio.git
